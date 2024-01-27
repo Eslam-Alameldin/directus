@@ -91,7 +91,7 @@ docker compose up
 ```
 
 ### 2. Setup project collections
-Login using the admin credentials and create the module and task collections and its fields.
+Login using the admin credentials and create the module and task collections and their fields.
 
 ### 3. Create a hook extension
 
