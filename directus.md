@@ -96,7 +96,7 @@ Login using the admin credentials and create the module and task collections and
 ### 3. Create a hook extension
 
 
-##### 1. install dependencies
+#### 1. install dependencies
 Open a console to your preferred working directory and initialize a new extension, which will create the boilerplate code for your display.
 
 ```shell
@@ -107,7 +107,7 @@ A list of options will appear (choose hook), and type a name for your extension 
 
 Now the boilerplate has been created, then open the directory in your code editor.
 
-##### 2. Build the hook
+#### 2. Build the hook
 The entrypoint of your hook is the index file inside the src/ folder of your extension package. It exports a register function to register one or more event listeners.
 
 The register function receives an object containing the type-specific register functions as the first parameter:
@@ -126,7 +126,7 @@ The second parameter is a context object with the following properties:
 - emitter — Event emitter instance that can be used to emit custom events for other extensions.
 
 
-##### Filter
+#### Filter
 Filter hooks act on the event's payload before the event is emitted. They allow you to check, modify, or cancel an event.
 
 The filter register function receives two parameters:
@@ -143,7 +143,7 @@ The context object has the following properties:
 - schema — The current API schema in use
 - accountability — Information about the current user
 
-##### Action
+#### Action
 Action hooks execute after a defined event and receive data related to the event. Use action hooks when you need to automate responses to CRUD events on items or server actions.
 
 The action register function receives two parameters:
@@ -230,7 +230,7 @@ Build the hook with the latest changes
 npm run build
 ```
 
-##### 3. Add Hook to Directus:
+#### 3. Add Hook to Directus:
 When Directus starts, it will look in the extensions directory for any subdirectory starting with directus-extension-, and attempt to load them.
 in our case we will create a folder named directus-extension-updateTaskStatus in hooks directory and move the package.json file and the index.js file generated in the dist folder
 Restart the container to load the extension.
