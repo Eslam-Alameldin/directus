@@ -27,31 +27,28 @@ You can add custom logic to your project using two methods:
      You can find more about extensions at this link: https://docs.directus.io/extensions/introduction.html
 
 # Explaining how to add an extension to your project by a usecase
-
 Our usecase is a project that have two collection types module and task
+  - module collection has the following fileds:
 
-- module collection has the following fileds:
+    - name which is string
+    - currentOrder which is number
+    - status which is enumeration that has three values ( toDo, inProgress, done)
 
-  - name which is string
-  - currentOrder which is number
-  - status which is enumeration that has three values ( toDo, inProgress, done)
-
-- the task collection has the following fields:
-  - name which is string
-  - status which is boolean
-  - moduleId which is relation with module collection
+  - the task collection has the following fields:
+    - name which is string
+    - status which is boolean
+    - moduleId which is relation with module collection
 
 we need to add custom logic that enables us do the following:
 
-- if all tasks related to a module is false the module status is toDo
-- if one of the tasks related to a module is true the module status changes to inProgress
-- if all tasks related to a module is true the module status changes to done
-- we can't update a task status to true if a module with higher priority than its module is not done
+  - if all tasks related to a module is false the module status is toDo
+  - if one of the tasks related to a module is true the module status changes to inProgress
+  - if all tasks related to a module is true the module status changes to done
+  - we can't update a task status to true if a module with higher priority than its module is not done
 
 ## Solution
 
-### 1. Create a Docker Compose File
-
+  ### 1. Create a Docker Compose File
 Create a new empty folder on your Desktop called directus. Within this new folder, create the three empty folders database, uploads, and extensions.
 Open a text editor such as Visual Studio Code, Copy and paste the following and save the file as docker-compose.yml
 
@@ -87,21 +84,19 @@ Let's step through it:
   - ADMIN_EMAIL and ADMIN_PASSWORD is the initial admin user credentials on first launch.
   - DB_CLIENT and DB_FILENAME are defining the connection to your database.
   - WEBSOCKETS_ENABLED is not required, but enables Directus Realtime.
-
-Move to the directus directory and Run
-
+ 
+Move to the directus directory and Run 
 ```shell
 docker compose up
 ```
 
 ### 2. Setup project collections
-
 Login using the admin credentials and create the module and task collections and its fields.
 
 ### 3. Create a hook extension
 
-##### 1. install dependencies
 
+##### 1. install dependencies
 Open a console to your preferred working directory and initialize a new extension, which will create the boilerplate code for your display.
 
 ```shell
@@ -113,11 +108,65 @@ A list of options will appear (choose hook), and type a name for your extension 
 Now the boilerplate has been created, then open the directory in your code editor.
 
 ##### 2. Build the hook
+The entrypoint of your hook is the index file inside the src/ folder of your extension package. It exports a register function to register one or more event listeners.
 
-Open the index.js file inside the /src directory and start write your custom logic
-in our case we will create filter hook and action hook.
+The register function receives an object containing the type-specific register functions as the first parameter:
+- filter — Listen for a filter event
+- action — Listen for an action event
+- init — Listen for an init event
+- schedule — Execute a function at certain points in time
+- embed — Inject custom JavaScript or CSS within the Data Studio
+
+The second parameter is a context object with the following properties:
+- services — All API internal services
+- database — Knex instance that is connected to the current database
+- getSchema — Async function that reads the full available schema for use in services
+- env — Parsed environment variables
+- logger — Pino instance.
+- emitter — Event emitter instance that can be used to emit custom events for other extensions.
+
+
+##### Filter
+Filter hooks act on the event's payload before the event is emitted. They allow you to check, modify, or cancel an event.
+
+The filter register function receives two parameters:
+- The event name
+- A callback function that is executed whenever the event is emitted.
+
+The callback function itself receives three parameters:
+- The modifiable payload
+- An event-specific meta object
+- A context object
+
+The context object has the following properties:
+- database — The current database transaction
+- schema — The current API schema in use
+- accountability — Information about the current user
+
+##### Action
+Action hooks execute after a defined event and receive data related to the event. Use action hooks when you need to automate responses to CRUD events on items or server actions.
+
+The action register function receives two parameters:
+- The event name
+- A callback function that is executed whenever the event is emitted.
+
+The callback function itself receives two parameters:
+- An event-specific meta object
+- A context object
+
+The context object has the following properties:
+- database — The current database transaction
+- schema — The current API schema in use
+- accountability — Information about the current user
+
+You can find more about the other hooks at this link: https://docs.directus.io/extensions/hooks.html
+
+Back to our usecase, in our case we will create filter hook and action hook.
 the filter hook will act as a middleware and do the needed validation before updating the task status.
 the action hook will update the module status after the task status updated .
+
+Open the index.js file inside the /src directory and start write your custom logic
+
 
 ```javascript
 export default ({ filter, action }, { database }) => {
@@ -182,7 +231,6 @@ npm run build
 ```
 
 ##### 3. Add Hook to Directus:
-
 When Directus starts, it will look in the extensions directory for any subdirectory starting with directus-extension-, and attempt to load them.
 in our case we will create a folder named directus-extension-updateTaskStatus in hooks directory and move the package.json file and the index.js file generated in the dist folder
 Restart the container to load the extension.
